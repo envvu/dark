@@ -1,0 +1,13 @@
+Details
+
+Candidate name:
+{{name}}
+
+candidate number:
+{{number}}
+
+candidate email:
+{{email}}
+
+candidate place :
+{{place}}

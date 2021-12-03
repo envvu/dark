@@ -1,0 +1,1082 @@
+{% load static %}
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="utf-8">
+    <title>Wheel of Fortune Bingo</title>
+
+    <!--
+
+    MIT License
+
+    Copyright (c) 2017 Jeremy Rue
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+    -->
+
+    <style type="text/css">
+    text{
+        font-family:Helvetica, Arial, sans-serif;
+        font-size:11px;
+        pointer-events:none;
+    }
+    #chart{
+
+        width:500px;
+        height:500px;
+        top:0;
+        left:0;
+    }
+    #question{
+        position: absolute;
+        width:100px;
+        height:250px;
+        top:0;
+        left:520px;
+    }
+    #question h1{
+        font-size: 50px;
+        font-weight: bold;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        position: absolute;
+        padding: 0;
+        margin: 0;
+        top:50%;
+        -webkit-transform:translate(0,-50%);
+                transform:translate(0,-50%);
+    }
+
+    @mixin spins($spin) {
+  from {transform: rotate(0deg)}
+    to {transform: rotate(720deg + $spin * 36deg)}
+}
+
+
+body {
+  background: white;
+}
+
+.container {
+  width: 600px;
+  margin: 0 auto;
+}
+.copy h1 {
+  color: #ffffff;
+  text-align: center;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 60px;
+}
+.wrapper {
+  margin: 0 0 30px;
+  position: relative;
+}
+
+.pointer-wrapper {
+  position: absolute;
+  top: -25px;
+  left:46%;
+  z-index: 1;
+}
+
+.button {
+  margin: 0 0 40px;
+}
+.btn {
+  display:block;
+  cursor: pointer;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  margin: 0 auto;
+  width: 250px;
+  height: 60px;
+  color: #ffffff;
+  background: #e01a22;
+
+  &:hover{
+    background: #f08d90;
+  }
+
+  &:focus {
+    outline: 0;
+  }
+}
+
+
+
+
+// @for $i from 1 through 10 {
+//   .wheel-#{$i} {  animation: spin#{$i} 6s ease-out 1; }
+// }
+
+// @for $i from 1 through 10 {
+//   @keyframes spin#{$i} {
+//     @include spins($i);
+//   }
+// }
+
+/* The Modal (background) */
+.modal {
+display: none; /* Hidden by default */
+position: fixed; /* Stay in place */
+z-index: 1; /* Sit on top */
+padding-top: 100px; /* Location of the box */
+left: 0;
+top: 0;
+width: 100%; /* Full width */
+height: 100%; /* Full height */
+overflow: auto; /* Enable scroll if needed */
+background-color: rgb(0,0,0); /* Fallback color */
+background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+background-color: #fefefe;
+margin: auto;
+padding: 20px;
+border: 1px solid #888;
+width: 20%;
+}
+
+/* The Close Button */
+.close {
+color: #aaaaaa;
+float: right;
+font-size: 28px;
+font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+color: #000;
+text-decoration: none;
+cursor: pointer;
+}
+.form {
+background-color: #15172b;
+border-radius: 20px;
+box-sizing: border-box;
+height: 500px;
+padding: 20px;
+width: 320px;
+}
+
+.title {
+color: #eee;
+font-family: sans-serif;
+font-size: 36px;
+font-weight: 600;
+margin-top: 30px;
+}
+
+.subtitle {
+color: #eee;
+font-family: sans-serif;
+font-size: 16px;
+font-weight: 600;
+margin-top: 10px;
+}
+
+.input-container {
+height: 50px;
+position: relative;
+width: 100%;
+}
+
+.ic1 {
+margin-top: 40px;
+}
+
+.ic2 {
+margin-top: 30px;
+}
+
+.input {
+background-color: #303245;
+border-radius: 12px;
+border: 0;
+box-sizing: border-box;
+color: #eee;
+font-size: 18px;
+height: 100%;
+outline: 0;
+padding: 4px 20px 0;
+width: 100%;
+}
+
+.cut {
+background-color: #15172b;
+border-radius: 10px;
+height: 20px;
+left: 20px;
+position: absolute;
+top: -20px;
+transform: translateY(0);
+transition: transform 200ms;
+width: 76px;
+}
+
+.cut-short {
+width: 50px;
+}
+
+.input:focus ~ .cut,
+.input:not(:placeholder-shown) ~ .cut {
+transform: translateY(8px);
+}
+
+.placeholder {
+color: #65657b;
+font-family: sans-serif;
+left: 20px;
+line-height: 14px;
+pointer-events: none;
+position: absolute;
+transform-origin: 0 50%;
+transition: transform 200ms, color 200ms;
+top: 20px;
+}
+
+.input:focus ~ .placeholder,
+.input:not(:placeholder-shown) ~ .placeholder {
+transform: translateY(-30px) translateX(10px) scale(0.75);
+}
+
+.input:not(:placeholder-shown) ~ .placeholder {
+color: #808097;
+}
+
+.input:focus ~ .placeholder {
+color: #dc2f55;
+}
+
+.submit {
+background-color: #08d;
+border-radius: 12px;
+border: 0;
+box-sizing: border-box;
+color: #eee;
+cursor: pointer;
+font-size: 18px;
+height: 50px;
+margin-top: 38px;
+// outline: 0;
+text-align: center;
+width: 100%;
+}
+
+.submit:active {
+background-color: #06b;
+}
+
+
+
+<!--body {-->
+<!--  background: black;-->
+<!--}-->
+
+.box {
+  position: relative;
+}
+.box::before {
+  content: "";
+  width: 440px;
+  height: 440px;
+  background-color: #89cff0;
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+  border-radius: 50%;
+}
+.box-body {
+  position: relative;
+  height: 200px;
+  width: 200px;
+  margin-top: 123.3333333333px;
+  background-color: #cc231e;
+  border-bottom-left-radius: 5%;
+  border-bottom-right-radius: 5%;
+  box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(#762c2c,#ff0303);
+}
+.box-body .img{
+  opacity: 0;
+  ransform: translateY(0%);
+  transition: all 0.5s;
+  margin: 0 auto;
+  display: block;
+}
+.box-body:hover {
+  cursor: pointer;
+  -webkit-animation: box-body 1s forwards ease-in-out;
+          animation: box-body 1s forwards ease-in-out;
+}
+.box-body:hover .img{
+  opacity: 1;
+  z-index: 0;
+  transform: translateY(-157px);
+
+
+
+}
+.box-body:hover .box-lid {
+  -webkit-animation: box-lid 1s forwards ease-in-out;
+          animation: box-lid 1s forwards ease-in-out;
+}
+.box-body:hover .box-bowtie::before {
+  -webkit-animation: box-bowtie-left 1.1s forwards ease-in-out;
+          animation: box-bowtie-left 1.1s forwards ease-in-out;
+}
+.box-body:hover .box-bowtie::after {
+  -webkit-animation: box-bowtie-right 1.1s forwards ease-in-out;
+          animation: box-bowtie-right 1.1s forwards ease-in-out;
+}
+.box-body::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+          transform: translateX(-50%);
+  width: 50px;
+  background: linear-gradient(#ffffff,#ffefa0)
+}
+.box-lid {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+          transform: translateX(-50%);
+  bottom: 90%;
+  height: 40px;
+  background-color: #cc231e;
+  height: 40px;
+  width: 220px;
+  border-radius: 5%;
+  box-shadow: 0 8px 4px -4px rgba(0, 0, 0, 0.3);
+}
+.box-lid::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+          transform: translateX(-50%);
+  width: 50px;
+  background: linear-gradient(#ffefa0,#fff)
+}
+.box-bowtie {
+  z-index: 1;
+  height: 100%;
+}
+.box-bowtie::before, .box-bowtie::after {
+  content: "";
+
+  border: 16.6666666667px solid white;
+  border-radius: 50% 50% 0 50%;
+  position: absolute;
+  bottom: 99%;
+  z-index: -1;
+}
+.box-bowtie::before {
+  left: 50%;
+  -webkit-transform: translateX(-100%) skew(10deg, 10deg);
+          transform: translateX(-100%) skew(10deg, 10deg);
+}
+.box-bowtie::after {
+  left: 50%;
+  -webkit-transform: translateX(0%) rotate(90deg) skew(10deg, 10deg);
+          transform: translateX(0%) rotate(90deg) skew(10deg, 10deg);
+}
+
+@-webkit-keyframes box-lid {
+  0%,
+  42% {
+    -webkit-transform: translate3d(-50%, 0%, 0) rotate(0deg);
+            transform: translate3d(-50%, 0%, 0) rotate(0deg);
+  }
+  60% {
+    -webkit-transform: translate3d(-85%, -230%, 0) rotate(-25deg);
+            transform: translate3d(-85%, -230%, 0) rotate(-25deg);
+  }
+  90%, 100% {
+    -webkit-transform: translate3d(-119%, 225%, 0) rotate(-70deg);
+            transform: translate3d(-119%, 225%, 0) rotate(-70deg);
+  }
+}
+
+@keyframes box-lid {
+  0%,
+  42% {
+    -webkit-transform: translate3d(-50%, 0%, 0) rotate(0deg);
+            transform: translate3d(-50%, 0%, 0) rotate(0deg);
+  }
+  60% {
+    -webkit-transform: translate3d(-85%, -230%, 0) rotate(-25deg);
+            transform: translate3d(-85%, -230%, 0) rotate(-25deg);
+  }
+  90%, 100% {
+    -webkit-transform: translate3d(-119%, 225%, 0) rotate(-70deg);
+            transform: translate3d(-119%, 225%, 0) rotate(-70deg);
+  }
+}
+@-webkit-keyframes box-body {
+  0% {
+    -webkit-transform: translate3d(0%, 0%, 0) rotate(0deg);
+            transform: translate3d(0%, 0%, 0) rotate(0deg);
+  }
+  25% {
+    -webkit-transform: translate3d(0%, 25%, 0) rotate(20deg);
+            transform: translate3d(0%, 25%, 0) rotate(20deg);
+  }
+  50% {
+    -webkit-transform: translate3d(0%, -15%, 0) rotate(0deg);
+            transform: translate3d(0%, -15%, 0) rotate(0deg);
+  }
+  70% {
+    -webkit-transform: translate3d(0%, 0%, 0) rotate(0deg);
+            transform: translate3d(0%, 0%, 0) rotate(0deg);
+  }
+}
+@keyframes box-body {
+  0% {
+    -webkit-transform: translate3d(0%, 0%, 0) rotate(0deg);
+            transform: translate3d(0%, 0%, 0) rotate(0deg);
+  }
+  25% {
+    -webkit-transform: translate3d(0%, 25%, 0) rotate(20deg);
+            transform: translate3d(0%, 25%, 0) rotate(20deg);
+  }
+  50% {
+    -webkit-transform: translate3d(0%, -15%, 0) rotate(0deg);
+            transform: translate3d(0%, -15%, 0) rotate(0deg);
+  }
+  70% {
+    -webkit-transform: translate3d(0%, 0%, 0) rotate(0deg);
+            transform: translate3d(0%, 0%, 0) rotate(0deg);
+  }
+}
+@-webkit-keyframes box-bowtie-right {
+  0%,
+  50%,
+  75% {
+    -webkit-transform: translateX(0%) rotate(90deg) skew(10deg, 10deg);
+            transform: translateX(0%) rotate(90deg) skew(10deg, 10deg);
+  }
+  90%,
+  100% {
+    -webkit-transform: translate(-50%, -15%) rotate(45deg) skew(10deg, 10deg);
+            transform: translate(-50%, -15%) rotate(45deg) skew(10deg, 10deg);
+    box-shadow: 0px 4px 8px -4px rgba(0, 0, 0, 0.3);
+  }
+}
+@keyframes box-bowtie-right {
+  0%,
+  50%,
+  75% {
+    -webkit-transform: translateX(0%) rotate(90deg) skew(10deg, 10deg);
+            transform: translateX(0%) rotate(90deg) skew(10deg, 10deg);
+  }
+  90%,
+  100% {
+    -webkit-transform: translate(-50%, -15%) rotate(45deg) skew(10deg, 10deg);
+            transform: translate(-50%, -15%) rotate(45deg) skew(10deg, 10deg);
+    box-shadow: 0px 4px 8px -4px rgba(0, 0, 0, 0.3);
+  }
+}
+@-webkit-keyframes box-bowtie-left {
+  0% {
+    -webkit-transform: translateX(-100%) rotate(0deg) skew(10deg, 10deg);
+            transform: translateX(-100%) rotate(0deg) skew(10deg, 10deg);
+  }
+  50%,
+  75% {
+    -webkit-transform: translate(-50%, -15%) rotate(45deg) skew(10deg, 10deg);
+            transform: translate(-50%, -15%) rotate(45deg) skew(10deg, 10deg);
+  }
+  90%,
+  100% {
+    -webkit-transform: translateX(-100%) rotate(0deg) skew(10deg, 10deg);
+            transform: translateX(-100%) rotate(0deg) skew(10deg, 10deg);
+  }
+}
+@keyframes box-bowtie-left {
+  0% {
+    -webkit-transform: translateX(-100%) rotate(0deg) skew(10deg, 10deg);
+            transform: translateX(-100%) rotate(0deg) skew(10deg, 10deg);
+  }
+  50%,
+  75% {
+    -webkit-transform: translate(-50%, -15%) rotate(45deg) skew(10deg, 10deg);
+            transform: translate(-50%, -15%) rotate(45deg) skew(10deg, 10deg);
+  }
+  90%,
+  100% {
+    -webkit-transform: translateX(-100%) rotate(0deg) skew(10deg, 10deg);
+            transform: translateX(-100%) rotate(0deg) skew(10deg, 10deg);
+  }
+}
+
+
+
+
+
+    </style>
+
+</head>
+<body>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-5 text-center col-sl 12">
+            <center><img src="{% static 'image/logo.jpg' %}" alt="" width="100px"></center>
+
+
+        </div>
+    </div>
+</div>
+<!--<div class="container">-->
+<!--    <div class="row">-->
+<!--        <div class="col-sm-12">-->
+
+
+<!--               &#127881; <h2> coming soon...........</h2> &#127881;-->
+
+
+
+
+<!--        </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+<!--<div class="container">-->
+<!--    <div class="row">-->
+<!--        <div class="col-sm-4">-->
+<!--            <h2>Congratulations!</h2>-->
+<!--            <p>Through the questionnaire, you will have a chance to get 6000 Rupee</p>-->
+
+
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+
+<link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet">
+
+<div class="container">
+
+    <div class="copy">
+        <h1 style="color:#f04135">Spin to Win!</h1>
+    </div>
+    <div class="wrapper">
+        <div class="pointer-wrapper">
+            <img src="https://register.flybuys.com.au/cdn/edm/library/assets/2017_07/wheel-pointer-v2.png"
+                 alt="pointer">
+        </div>
+        <img src="https://register.flybuys.com.au/cdn/edm/library/assets/2017_07/spin-wheel-v2.png" alt="spping wheel"
+             class="wheel">
+    </div>
+    <div class="button">
+        <button class="btn" id="myBtn">Spin</button>
+        <!-- HTML !-->
+
+
+
+    </div>
+</div>
+
+<!-- The Modal -->
+<center>
+    <div id="myModal" class="modal">
+
+        <!-- Modal content -->
+        <!--<div class="modal-content">-->
+        <!--<div class="form">-->
+        <!--    <form action="" method="post">-->
+        <!--       {% csrf_token %}-->
+
+        <!--<div class="title">Congratulations</div>-->
+        <!--<div class="subtitle">Let's create your account!</div>-->
+        <!--<div class="input-container ic1">-->
+        <!--<input id="name"  name="name" class="input" type="text" required= placeholder="" />-->
+        <!--<div class="cut"></div>-->
+        <!--<label for="name" class="placeholder">Name</label>-->
+        <!--</div>-->
+        <!--<div class="input-container ic2">-->
+        <!--<input id="number"  name="number" class="input" type="tel" placeholder=" " />-->
+        <!--<div class="cut"></div>-->
+        <!--<label for="number" class="placeholder">Phone number</label>-->
+        <!--</div>-->
+        <!--<div class="input-container ic2">-->
+        <!--<input id="email" name="email" class="input" type="text" placeholder=" " />-->
+        <!--<div class="cut cut-short"></div>-->
+        <!--    <label for="email" class="placeholder">Email</label>>-->
+        <!--</div>-->
+        <!--<button type="text" class="submit">Conform and continue</button>-->
+        <!--    </form>-->
+        <!--</div>-->
+
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+<!--                    <h3 class="text-center text-light my-5"><strong>Hover the box</strong></h3>-->
+                </div>
+                <div class="col-12 mt-5 d-flex justify-content-center">
+                    <div class="box">
+                        <div class="box-body">
+
+<!--                            <button class="button-3" role="button">Button 3</button>-->
+                            <button class="img" ><a href="{% url 'aa' %}" style="text-decoration:none;display:block;
+  cursor: pointer;
+  font-size: 16px;
+  border: none;
+  margin: 0 auto;
+  width: 200px;
+  height: 20px;
+  color: #ffffff;
+  background: #e01a22;"> Register</a></button>
+
+                            <img class="img" src="{% static 'image/mny.png' %}" width="130px" height="130px">
+
+
+                            <div class="box-lid">
+
+
+                                <div class="box-bowtie"></div>
+
+
+                            </div>
+                        </div>
+                    </div>
+<br>
+                                <br>
+                </div>
+            </div>
+        </div>
+
+        <!--</div>-->
+
+
+    </div>
+
+    </div>
+</center>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <img src="{% static 'image/scn2.png' %}" alt="" width="100%">
+            <img src="{% static 'image/scn3.png' %}" alt="" width="100%">
+            <img src="{% static 'image/scn4.png' %}" alt="" width="100%">
+
+
+
+        </div>
+    </div>
+</div>
+<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+<script type="text/javascript">
+    (function($) {
+    var supportedCSS,supportedCSSOrigin, styles=document.getElementsByTagName("head")[0].style,toCheck="transformProperty WebkitTransform OTransform msTransform MozTransform".split(" ");
+    for (var a = 0; a < toCheck.length; a++) if (styles[toCheck[a]] !== undefined) { supportedCSS = toCheck[a]; }
+    if (supportedCSS) {
+      supportedCSSOrigin = supportedCSS.replace(/[tT]ransform/,"TransformOrigin");
+      if (supportedCSSOrigin[0] == "T") supportedCSSOrigin[0] = "t";
+    }
+
+    // Bad eval to preven google closure to remove it from code o_O
+    eval('IE = "v"=="\v"');
+
+    jQuery.fn.extend({
+        rotate:function(parameters)
+        {
+          if (this.length===0||typeof parameters=="undefined") return;
+          if (typeof parameters=="number") parameters={angle:parameters};
+          var returned=[];
+          for (var i=0,i0=this.length;i<i0;i++)
+          {
+            var element=this.get(i);
+            if (!element.Wilq32 || !element.Wilq32.PhotoEffect) {
+
+              var paramClone = $.extend(true, {}, parameters);
+              var newRotObject = new Wilq32.PhotoEffect(element,paramClone)._rootObj;
+
+              returned.push($(newRotObject));
+            }
+            else {
+              element.Wilq32.PhotoEffect._handleRotation(parameters);
+            }
+          }
+          return returned;
+        },
+        getRotateAngle: function(){
+          var ret = [0];
+          for (var i=0,i0=this.length;i<i0;i++)
+          {
+            var element=this.get(i);
+            if (element.Wilq32 && element.Wilq32.PhotoEffect) {
+              ret[i] = element.Wilq32.PhotoEffect._angle;
+            }
+          }
+          return ret;
+        },
+        stopRotate: function(){
+          for (var i=0,i0=this.length;i<i0;i++)
+          {
+            var element=this.get(i);
+            if (element.Wilq32 && element.Wilq32.PhotoEffect) {
+              clearTimeout(element.Wilq32.PhotoEffect._timer);
+            }
+          }
+        }
+    });
+
+    // Library agnostic interface
+
+    Wilq32=window.Wilq32||{};
+    Wilq32.PhotoEffect=(function(){
+
+      if (supportedCSS) {
+        return function(img,parameters){
+          img.Wilq32 = {
+            PhotoEffect: this
+          };
+
+          this._img = this._rootObj = this._eventObj = img;
+          this._handleRotation(parameters);
+        }
+      } else {
+        return function(img,parameters) {
+          this._img = img;
+          this._onLoadDelegate = [parameters];
+
+          this._rootObj=document.createElement('span');
+          this._rootObj.style.display="inline-block";
+          this._rootObj.Wilq32 =
+            {
+              PhotoEffect: this
+            };
+          img.parentNode.insertBefore(this._rootObj,img);
+
+          if (img.complete) {
+            this._Loader();
+          } else {
+            var self=this;
+            // TODO: Remove jQuery dependency
+            jQuery(this._img).bind("load", function(){ self._Loader(); });
+          }
+        }
+      }
+    })();
+
+    Wilq32.PhotoEffect.prototype = {
+      _setupParameters : function (parameters){
+        this._parameters = this._parameters || {};
+        if (typeof this._angle !== "number") { this._angle = 0 ; }
+        if (typeof parameters.angle==="number") { this._angle = parameters.angle; }
+        this._parameters.animateTo = (typeof parameters.animateTo === "number") ? (parameters.animateTo) : (this._angle);
+
+        this._parameters.step = parameters.step || this._parameters.step || null;
+        this._parameters.easing = parameters.easing || this._parameters.easing || this._defaultEasing;
+        this._parameters.duration = 'duration' in parameters ? parameters.duration : parameters.duration || this._parameters.duration || 1000;
+        this._parameters.callback = parameters.callback || this._parameters.callback || this._emptyFunction;
+        this._parameters.center = parameters.center || this._parameters.center || ["50%","50%"];
+        if (typeof this._parameters.center[0] == "string") {
+          this._rotationCenterX = (parseInt(this._parameters.center[0],10) / 100) * this._imgWidth * this._aspectW;
+        } else {
+          this._rotationCenterX = this._parameters.center[0];
+        }
+        if (typeof this._parameters.center[1] == "string") {
+          this._rotationCenterY = (parseInt(this._parameters.center[1],10) / 100) * this._imgHeight * this._aspectH;
+        } else {
+          this._rotationCenterY = this._parameters.center[1];
+        }
+
+        if (parameters.bind && parameters.bind != this._parameters.bind) { this._BindEvents(parameters.bind); }
+      },
+      _emptyFunction: function(){},
+      _defaultEasing: function (x, t, b, c, d) { return -c * ((t=t/d-1)*t*t*t - 1) + b },
+      _handleRotation : function(parameters, dontcheck){
+        if (!supportedCSS && !this._img.complete && !dontcheck) {
+          this._onLoadDelegate.push(parameters);
+          return;
+        }
+        this._setupParameters(parameters);
+        if (this._angle==this._parameters.animateTo) {
+          this._rotate(this._angle);
+        }
+        else {
+          this._animateStart();
+        }
+      },
+
+      _BindEvents:function(events){
+        if (events && this._eventObj)
+        {
+          // Unbinding previous Events
+          if (this._parameters.bind){
+            var oldEvents = this._parameters.bind;
+            for (var a in oldEvents) if (oldEvents.hasOwnProperty(a))
+              // TODO: Remove jQuery dependency
+              jQuery(this._eventObj).unbind(a,oldEvents[a]);
+          }
+
+        this._parameters.bind = events;
+        for (var a in events) if (events.hasOwnProperty(a))
+          // TODO: Remove jQuery dependency
+          jQuery(this._eventObj).bind(a,events[a]);
+        }
+      },
+
+      _Loader:(function()
+      {
+        if (IE)
+          return function() {
+            var width=this._img.width;
+            var height=this._img.height;
+            this._imgWidth = width;
+            this._imgHeight = height;
+            this._img.parentNode.removeChild(this._img);
+
+            this._vimage = this.createVMLNode('image');
+            this._vimage.src=this._img.src;
+            this._vimage.style.height=height+"px";
+            this._vimage.style.width=width+"px";
+            this._vimage.style.position="absolute"; // FIXES IE PROBLEM - its only rendered if its on absolute position!
+            this._vimage.style.top = "0px";
+            this._vimage.style.left = "0px";
+            this._aspectW = this._aspectH = 1;
+
+            /* Group minifying a small 1px precision problem when rotating object */
+            this._container = this.createVMLNode('group');
+            this._container.style.width=width;
+            this._container.style.height=height;
+            this._container.style.position="absolute";
+            this._container.style.top="0px";
+            this._container.style.left="0px";
+            this._container.setAttribute('coordsize',width-1+','+(height-1)); // This -1, -1 trying to fix ugly problem with small displacement on IE
+            this._container.appendChild(this._vimage);
+
+            this._rootObj.appendChild(this._container);
+            this._rootObj.style.position="relative"; // FIXES IE PROBLEM
+            this._rootObj.style.width=width+"px";
+            this._rootObj.style.height=height+"px";
+            this._rootObj.setAttribute('id',this._img.getAttribute('id'));
+            this._rootObj.className=this._img.className;
+            this._eventObj = this._rootObj;
+            var parameters;
+            while (parameters = this._onLoadDelegate.shift()) {
+              this._handleRotation(parameters, true);
+            }
+          }
+          else return function () {
+            this._rootObj.setAttribute('id',this._img.getAttribute('id'));
+            this._rootObj.className=this._img.className;
+
+            this._imgWidth=this._img.naturalWidth;
+            this._imgHeight=this._img.naturalHeight;
+            var _widthMax=Math.sqrt((this._imgHeight)*(this._imgHeight) + (this._imgWidth) * (this._imgWidth));
+            this._width = _widthMax * 3;
+            this._height = _widthMax * 3;
+
+            this._aspectW = this._img.offsetWidth/this._img.naturalWidth;
+            this._aspectH = this._img.offsetHeight/this._img.naturalHeight;
+
+            this._img.parentNode.removeChild(this._img);
+
+
+            this._canvas=document.createElement('canvas');
+            this._canvas.setAttribute('width',this._width);
+            this._canvas.style.position="relative";
+            this._canvas.style.left = -this._img.height * this._aspectW + "px";
+            this._canvas.style.top = -this._img.width * this._aspectH + "px";
+            this._canvas.Wilq32 = this._rootObj.Wilq32;
+
+            this._rootObj.appendChild(this._canvas);
+            this._rootObj.style.width=this._img.width*this._aspectW+"px";
+            this._rootObj.style.height=this._img.height*this._aspectH+"px";
+            this._eventObj = this._canvas;
+
+            this._cnv=this._canvas.getContext('2d');
+            var parameters;
+            while (parameters = this._onLoadDelegate.shift()) {
+              this._handleRotation(parameters, true);
+            }
+          }
+      })(),
+
+      _animateStart:function()
+      {
+        if (this._timer) {
+          clearTimeout(this._timer);
+        }
+        this._animateStartTime = +new Date;
+        this._animateStartAngle = this._angle;
+        this._animate();
+      },
+      _animate:function()
+      {
+        var actualTime = +new Date;
+        var checkEnd = actualTime - this._animateStartTime > this._parameters.duration;
+
+        // TODO: Bug for animatedGif for static rotation ? (to test)
+        if (checkEnd && !this._parameters.animatedGif)
+        {
+          clearTimeout(this._timer);
+        }
+        else
+        {
+          if (this._canvas||this._vimage||this._img) {
+            var angle = this._parameters.easing(0, actualTime - this._animateStartTime, this._animateStartAngle, this._parameters.animateTo - this._animateStartAngle, this._parameters.duration);
+            this._rotate((~~(angle*10))/10);
+          }
+          if (this._parameters.step) {
+            this._parameters.step(this._angle);
+          }
+          var self = this;
+          this._timer = setTimeout(function()
+          {
+            self._animate.call(self);
+          }, 10);
+        }
+
+      // To fix Bug that prevents using recursive function in callback I moved this function to back
+      if (this._parameters.callback && checkEnd){
+        this._angle = this._parameters.animateTo;
+        this._rotate(this._angle);
+        this._parameters.callback.call(this._rootObj);
+      }
+      },
+
+      _rotate : (function()
+      {
+        var rad = Math.PI/180;
+        if (IE)
+          return function(angle)
+        {
+          this._angle = angle;
+          this._container.style.rotation=(angle%360)+"deg";
+          this._vimage.style.top = -(this._rotationCenterY - this._imgHeight/2) + "px";
+          this._vimage.style.left = -(this._rotationCenterX - this._imgWidth/2) + "px";
+          this._container.style.top = this._rotationCenterY - this._imgHeight/2 + "px";
+          this._container.style.left = this._rotationCenterX - this._imgWidth/2 + "px";
+
+        }
+          else if (supportedCSS)
+          return function(angle){
+            this._angle = angle;
+            this._img.style[supportedCSS]="rotate("+(angle%360)+"deg)";
+            this._img.style[supportedCSSOrigin]=this._parameters.center.join(" ");
+          }
+          else
+            return function(angle)
+          {
+            this._angle = angle;
+            angle=(angle%360)* rad;
+            // clear canvas
+            this._canvas.width = this._width;//+this._widthAdd;
+            this._canvas.height = this._height;//+this._heightAdd;
+
+            // REMEMBER: all drawings are read from backwards.. so first function is translate, then rotate, then translate, translate..
+            this._cnv.translate(this._imgWidth*this._aspectW,this._imgHeight*this._aspectH);	// at least center image on screen
+            this._cnv.translate(this._rotationCenterX,this._rotationCenterY);			// we move image back to its orginal
+            this._cnv.rotate(angle);										// rotate image
+            this._cnv.translate(-this._rotationCenterX,-this._rotationCenterY);		// move image to its center, so we can rotate around its center
+            this._cnv.scale(this._aspectW,this._aspectH); // SCALE - if needed ;)
+            this._cnv.drawImage(this._img, 0, 0);							// First - we draw image
+          }
+
+      })()
+      }
+
+      if (IE)
+      {
+        Wilq32.PhotoEffect.prototype.createVMLNode=(function(){
+          document.createStyleSheet().addRule(".rvml", "behavior:url(#default#VML)");
+          try {
+            !document.namespaces.rvml && document.namespaces.add("rvml", "urn:schemas-microsoft-com:vml");
+            return function (tagName) {
+              return document.createElement('<rvml:' + tagName + ' class="rvml">');
+            };
+          } catch (e) {
+            return function (tagName) {
+              return document.createElement('<' + tagName + ' xmlns="urn:schemas-microsoft.com:vml" class="rvml">');
+            };
+          }
+        })();
+      }
+
+})(jQuery);
+
+
+$(".btn").click(function(){
+    var spin = (Math.floor((Math.random() * 10) + 1)) * 36;
+
+
+                     $(".wheel").rotate({
+                          angle: 0,
+                          animateTo: 720 + spin,
+                          duration: 6000
+                      });
+                      setTimeout(function(){
+                          $(".wheel").stopRotate();
+                      }, 6000);
+
+     // $(this).removeClass("wheel-" + spin);
+    // console.log(spin);
+    // $(".wheel").addClass("wheel-" + spin);
+    // $(".wheel").css({"tra": "yellow", "font-size": "200%"});
+});
+
+// Get the modal
+var modal = document.getElementById("myModal");
+
+// Get the button that opens the modal
+var btn = document.getElementById("myBtn");
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks the button, open the modal
+btn.onclick = function() {
+modal.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+if (event.target == modal) {
+modal.style.display = "none";
+}
+}
+
+</script>
+
+
+</body>
+
+</html>
